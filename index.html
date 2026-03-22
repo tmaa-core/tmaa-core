@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T-CORE | TMAA Record & Evaluation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+   <style>
+        :root { --primary: #1e3a8a; --secondary: #3b82f6; --accent: #f59e0b; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        header { width: 100%; background: var(--primary); color: white; padding: 2rem 0; text-align: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .tabs { margin: 20px 0; display: flex; gap: 10px; }
+        .tab-btn { padding: 10px 20px; border: none; background: #e2e8f0; cursor: pointer; border-radius: 8px; font-weight: 600; transition: 0.3s; }
+        .tab-btn.active { background: var(--secondary); color: white; }
+        .container { width: 90%; max-width: 500px; background: var(--card); padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); display: none; }
+        .container.active { display: block; }
+        label { font-weight: bold; display: block; margin-top: 15px; }
+        input { width: 100%; padding: 12px; margin: 10px 0 20px 0; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
+        button.main-btn { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: 0.3s; }
+        button.main-btn:hover { background: var(--secondary); transform: translateY(-2px); }
+        #searchResult { margin-top: 25px; display: none; }
+        .result-card { padding: 25px; border-radius: 12px; background: #ffffff; border: 2px solid #e2e8f0; transition: 0.3s; }
+        .admin-theme { border-color: var(--accent); background: #fffcf5; }
+        .student-theme { border-color: var(--secondary); }
+        .role-badge { display: inline-block; padding: 5px 15px; border-radius: 99px; font-size: 0.75rem; font-weight: bold; margin-bottom: 15px; color: white; }
+        .bg-admin { background: var(--accent); }
+        .bg-student { background: var(--secondary); }
+        .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.95rem; }
+        .data-label { color: #64748b; font-size: 0.85rem; }
+        .data-value { font-weight: 600; text-align: right; }
+        .divider { margin: 15px 0; border: 0; border-top: 1px solid #e2e8f0; }
+
+        .non-active-theme {
+            filter: grayscale(0.8); 
+            opacity: 0.7; 
+            border-color: #94a3b8 !important;
+            background: #f1f5f9 !important;
+        }
+        .bg-non-active { 
+            background: #64748b !important; 
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1 style="margin:0">T-CORE</h1>
+    <p style="margin:5px 0 0 0; opacity: 0.8;">TMAA Central Online Record & Evaluation</p>
+</header>
+
+<div class="tabs">
+    <button class="tab-btn active" onclick="showTab('register')">Pendaftaran</button>
+    <button class="tab-btn" onclick="showTab('search')">Cari Data</button>
+</div>
+
+<div id="register" class="container active">
+    <h3>Pendaftaran Siswa Baru</h3>
+    <label>Character </label>
+    <input type="text" id="regChara" placeholder="Contoh: Mark Tuan">
+    <label>Full Name </label>
+    <input type="text" id="regFull" placeholder="Contoh: David Axel">
+    <label>Tanggal Lahir Character </label>
+    <input type="date" id="regDob">
+    <button class="main-btn" onclick="handleRegister()">Register</button>
+</div>
+
+<div id="search" class="container">
+    <h3>Pencarian Database</h3>
+    <label>Character </label>
+    <input type="text" id="searchChara" placeholder="Masukkan Nama Character">
+    <label>Full Name </label>
+    <input type="text" id="searchFull" placeholder="Masukkan Nama Lengkap">
+    <button class="main-btn" onclick="handleSearch()" style="background: var(--secondary);">Cari Data Record</button>
+    <div id="searchResult">
+        <div id="displayArea"></div>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyA40eWKKMQhne6ei6C9LAbgvQLJnvkp_Rk",
+        databaseURL: "https://tokyo-metropolitan-advanced-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "tokyo-metropolitan-advanced",
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function showTab(tabId) {
+        document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+function handleRegister() {
+        const chara = document.getElementById('regChara').value.trim();
+        const full = document.getElementById('regFull').value.trim();
+        const dob = document.getElementById('regDob').value;
+
+        if(!chara || !full || !dob) return alert("Harap isi semua kolom!");
+
+        // 1. Ambil Tanggal (DD)
+        const birthDate = new Date(dob);
+        const DD = String(birthDate.getDate()).padStart(2, '0');
+
+        // 2. Ambil Nomor Urut dari Metadata
+        const counterRef = db.ref('metadata/last_id_number');
+        
+        counterRef.once('value', (snapshot) => {
+            let lastNumber = snapshot.val() || 0;
+            let newNumber = lastNumber + 1;
+            
+            // 3. Format Nomor Urut XXX (3 digit)
+            const XXX = String(newNumber).padStart(3, '0');
+
+            // HASILNYA: TM-01-DDXXX (Contoh: TM-01-17001)
+            const finalID = "TM-01-" + DD + XXX;
+
+            // 4. Simpan ke Database
+            db.ref('registry/' + finalID).set({
+                student_id: finalID,
+                chara_name: chara,
+                full_name: full,
+                dob: dob, 
+                status: "Trainee",
+                angkatan: "1",
+                points: 0,
+                kelas: "A", 
+                keaktifan: "Aktif",
+                jabatan: "Siswa",
+                aktif_sejak: new Date().toLocaleDateString('id-ID')
+            }).then(() => {
+                counterRef.set(newNumber);
+                alert("Berhasil!\nID Personel: " + finalID);
+                location.reload(); 
+            });
+        });
+    }
+
+   function handleSearch() {
+        // 1. Ambil input user, hilangkan spasi (trim), dan paksa jadi huruf kecil (.toLowerCase())
+        const sChara = document.getElementById('searchChara').value.trim().toLowerCase();
+        const sFull = document.getElementById('searchFull').value.trim().toLowerCase();
+        const resultDiv = document.getElementById('searchResult');
+
+        db.ref('registry').once('value', (snap) => {
+            let found = false;
+            snap.forEach((child) => {
+                const val = child.val();
+                
+                // 2. Ambil data dari database dan paksa jadi huruf kecil juga saat pengecekan
+                // Dengan begini, "Avilio" atau "avilio" bakal tetap dianggap cocok (Match)
+                const dbChara = val.chara_name ? val.chara_name.toLowerCase() : "";
+                const dbFull = val.full_name ? val.full_name.toLowerCase() : "";
+
+                if(dbChara === sChara && dbFull === sFull) {
+                    found = true;
+                    val.student_id = child.key; // Biar ID tidak undefined
+                    renderData(val);
+                }
+            });
+
+            if(!found) {
+                alert("Data tidak ditemukan! Coba cek lagi ejaannya ya.");
+                resultDiv.style.display = "none";
+            }
+        });
+    }
+
+function renderData(data) {
+        const resultDiv = document.getElementById('searchResult');
+        const displayArea = document.getElementById('displayArea');
+        resultDiv.style.display = "block";
+
+        const isAdmin = (data.position && data.position.includes("Founder")) || data.status === "Admin";
+        
+        // Cek apakah statusnya Non-Active
+        const isNonActive = (data.status === "Non-Active");
+
+        // Tentukan Class Card (Emas/Biru + Redup jika Non-Active)
+        let cardClass = isAdmin ? "result-card admin-theme" : "result-card student-theme";
+        if (isNonActive) cardClass += " non-active-theme";
+
+        // Tentukan Warna Badge
+        let badgeText = isAdmin ? (data.position ? data.position.split(' ')[0].toUpperCase() : 'STAFF') : 'STUDENT';
+        let badgeClass = isAdmin ? "bg-admin" : "bg-student";
+        if (isNonActive) badgeClass = "bg-non-active";
+
+        let htmlContent = "";
+        if (isAdmin) {
+            htmlContent = `
+                <div class="${cardClass}">
+                    <span class="role-badge ${badgeClass}">${badgeText}</span>
+                    <div class="data-grid">
+                        <div class="data-label">Personnel ID:</div><div class="data-value">${data.student_id}</div>
+                        <div class="data-label">Chara Name:</div><div class="data-value">${data.chara_name}</div>
+                        <div class="data-label">Position:</div><div class="data-value" style="color:var(--accent)">${data.position}</div>
+                        <div class="data-label">Status:</div><div class="data-value">${data.status}</div>
+                        <div class="data-label">Active Period:</div><div class="data-value">${data.period}</div>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Bagian Student juga akan otomatis redup kalau statusnya diganti Non-Active
+            htmlContent = `
+                <div class="${cardClass}">
+                    <span class="role-badge ${badgeClass}">${badgeText}</span>
+                    <div class="data-grid">
+                        <div class="data-label">Student ID:</div><div class="data-value">${data.student_id}</div>
+                        <div class="data-label">Chara Name:</div><div class="data-value">${data.chara_name}</div>
+                        <div class="data-label">Class:</div><div class="data-value">${data.kelas || 'A'}</div>
+                        <div class="data-label">Enrollment Date:</div><div class="data-value">${data.period || data.dob || '-'}</div>
+                        <div class="data-label">Status:</div><div class="data-value">${data.status}</div>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="data-grid">
+                        <div class="data-label">Total Points:</div><div class="data-value" style="color:var(--secondary); font-size: 1.2rem">${data.points || 0}</div>
+                    </div>
+                </div>
+            `;
+        }
+        displayArea.innerHTML = htmlContent;
+    }
+</script>
+</body>
+</html>
