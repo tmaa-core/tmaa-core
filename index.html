@@ -3,64 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>T-CORE | Metropolitan Academy Personnel</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    <title>T-CORE | Metropolitan Management Engine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Share+Tech+Mono&family=Space+Grotesk:wght@700;800&display=swap" rel="stylesheet">
     <style>
         :root { 
-            --bg-main: #f8fafc; 
-            --card-bg: #ffffff; 
-            --text-main: #1e293b; 
-            --text-muted: #64748b; 
-            --accent-gold: #bf9b30; 
-            --primary-slate: #334155; 
-            --input-border: #e2e8f0;
+            --bg-black: #05070a;
+            --surface: rgba(10, 15, 25, 0.9);
+            --text-white: #ffffff;
+            --text-dim: #71717a;
+            --cyan-glow: #00f2ff;
+            --indigo-glow: #7c3aed;
+            --border-glow: rgba(0, 242, 255, 0.3);
         }
 
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); color: var(--text-main); margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; overflow-x: hidden; }
-        header { width: 100%; padding: 1.5rem 0; text-align: center; background-color: var(--card-bg); border-bottom: 1px solid var(--input-border); box-sizing: border-box; }
-        header h1 { margin: 0; font-family: 'Syne', sans-serif; font-weight: 800; letter-spacing: -1px; font-size: clamp(1.8rem, 5vw, 2.8rem); color: var(--accent-gold); text-transform: uppercase; }
-        header p { margin: 5px 10px 0; color: var(--text-muted); font-weight: 400; font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-black); background-image: radial-gradient(circle at center, #0f172a 0%, #05070a 100%); color: var(--text-white); margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; overflow-x: hidden; }
         
-        .tabs { margin: 20px 0; display: flex; background: var(--card-bg); padding: 4px; border-radius: 99px; border: 1px solid var(--input-border); width: fit-content; }
-        .tab-btn { padding: 10px 20px; border: none; background: transparent; cursor: pointer; border-radius: 99px; font-weight: 700; color: var(--text-muted); transition: 0.3s; font-size: 0.8rem; }
-        .tab-btn.active { background: var(--accent-gold); color: white; }
+        header { width: 100%; padding: 3rem 0; text-align: center; border-bottom: 1px solid var(--border-glow); position: relative; }
+        header h1 { margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: clamp(2.5rem, 8vw, 4rem); letter-spacing: -3px; color: var(--text-white); text-transform: uppercase; text-shadow: 0 0 20px rgba(0, 242, 255, 0.4); }
+        header p { margin: 15px 15px 0; color: var(--text-dim); font-size: 0.65rem; letter-spacing: 5px; text-transform: uppercase; font-weight: 600; }
+        
+        .tabs { margin: 30px 0; display: flex; gap: 5px; padding: 4px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-glow); }
+        .tab-btn { padding: 10px 20px; border: none; background: transparent; cursor: pointer; color: var(--text-dim); font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s; }
+        .tab-btn.active { background: var(--cyan-glow); color: #000; box-shadow: 0 0 15px var(--cyan-glow); }
 
-        .container { width: 92%; max-width: 850px; background: var(--card-bg); padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); display: none; margin-bottom: 40px; box-sizing: border-box; }
+        .container { width: 92%; max-width: 900px; background: var(--surface); backdrop-filter: blur(20px); padding: 30px; border: 1px solid var(--border-glow); display: none; margin-bottom: 50px; box-sizing: border-box; }
         .container.active { display: block; }
 
-        h2 { font-family: 'Syne', sans-serif; font-weight: 700; margin-top: 0; color: var(--primary-slate); letter-spacing: -0.5px; font-size: 1.4rem; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 20px; }
-        label { font-weight: 700; display: block; margin-top: 20px; font-size: 0.7rem; color: var(--primary-slate); text-transform: uppercase; letter-spacing: 1px; }
-        input { width: 100%; padding: 14px; margin-top: 8px; border: 1px solid var(--input-border); border-radius: 10px; font-size: 1rem; color: var(--text-main); box-sizing: border-box; background: #fafafa; }
-        input:focus { outline: none; border-color: var(--accent-gold); background: #ffffff; }
+        h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--text-white); margin-bottom: 30px; letter-spacing: 2px; text-transform: uppercase; border-left: 4px solid var(--cyan-glow); padding-left: 15px; }
         
-        button.main-btn { background: var(--primary-slate); color: white; border: none; padding: 16px; width: 100%; border-radius: 10px; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: 0.3s; margin-top: 30px; text-transform: uppercase; }
-
-        .search-box { display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; }
-        .btn-search { background: var(--accent-gold); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 700; cursor: pointer; }
-
-        .table-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .section-title { font-size: 0.7rem; font-weight: 800; color: var(--accent-gold); margin: 30px 0 10px 0; letter-spacing: 1.5px; text-transform: uppercase; border-bottom: 1px solid var(--input-border); padding-bottom: 8px; }
-        .result-table { width: 100%; border-collapse: collapse; min-width: 400px; }
-        .result-table th { text-align: left; padding: 12px; color: var(--text-muted); font-size: 0.7rem; border-bottom: 2px solid var(--input-border); text-transform: uppercase; }
-        .result-table td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.85rem; }
-        .view-link { color: var(--accent-gold); font-weight: 700; cursor: pointer; text-decoration: none; font-size: 0.75rem; padding: 6px 12px; background: rgba(191, 155, 48, 0.05); border-radius: 6px; }
-
-        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); padding: 15px; box-sizing: border-box; }
-        .modal-content { background: var(--card-bg); margin: 15% auto; padding: 25px; border-radius: 20px; width: 100%; max-width: 450px; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.2); border-top: 6px solid var(--accent-gold); box-sizing: border-box; }
-        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 1.8rem; cursor: pointer; color: var(--text-muted); }
+        .form-group { margin-bottom: 30px; }
+        label { display: block; font-size: 0.6rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; }
         
-        .data-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f1f5f9; align-items: center; gap: 10px; }
-        .label { color: var(--text-muted); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; flex-shrink: 0; }
-        .val { font-weight: 700; color: var(--primary-slate); text-align: right; font-size: 0.85rem; word-break: break-word; }
+        input { width: 100%; padding: 16px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0; font-size: 0.9rem; color: #fff; background: rgba(0, 0, 0, 0.5); box-sizing: border-box; font-family: 'Share Tech Mono', monospace; }
+        input:focus { outline: none; border-color: var(--cyan-glow); box-shadow: 0 0 10px var(--border-glow); }
+
+        button.main-btn { background: transparent; color: var(--cyan-glow); border: 1px solid var(--cyan-glow); padding: 18px; width: 100%; font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 0.9rem; cursor: pointer; text-transform: uppercase; letter-spacing: 4px; transition: 0.4s; margin-top: 10px; }
+        button.main-btn:hover { background: var(--cyan-glow); color: #000; box-shadow: 0 0 20px var(--cyan-glow); }
+
+        .search-box { display: flex; flex-direction: column; gap: 10px; margin-bottom: 40px; }
+        .btn-search { background: var(--indigo-glow); color: #fff; border: none; padding: 16px; font-family: 'Space Grotesk', sans-serif; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; box-shadow: 0 0 15px rgba(124, 58, 237, 0.2); }
+
+        .section-title { font-family: 'Space Grotesk', sans-serif; font-size: 0.7rem; font-weight: 800; color: var(--text-white); margin: 40px 0 15px 0; letter-spacing: 3px; text-transform: uppercase; border-bottom: 1px solid var(--border-glow); padding-bottom: 8px; }
+        .table-wrapper { width: 100%; overflow-x: auto; }
+        .result-table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        .result-table th { text-align: left; padding: 12px 0; font-size: 0.6rem; color: var(--text-dim); border-bottom: 1px solid var(--border-glow); letter-spacing: 2px; }
+        .result-table td { padding: 20px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-weight: 600; font-size: 0.9rem; }
+        
+        .view-link { color: var(--cyan-glow); text-decoration: none; font-weight: 800; cursor: pointer; font-size: 0.7rem; border: 1px solid var(--cyan-glow); padding: 6px 12px; transition: 0.3s; letter-spacing: 1px; text-transform: uppercase; }
+
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(15px); padding: 20px; box-sizing: border-box; }
+        .modal-content { background: #000; margin: 10% auto; padding: 30px; width: 100%; max-width: 480px; border: 1px solid var(--cyan-glow); box-shadow: 0 0 30px rgba(0, 242, 255, 0.2); position: relative; box-sizing: border-box; }
+        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 2rem; cursor: pointer; color: var(--cyan-glow); line-height: 1; }
+        
+        .data-row { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); align-items: center; gap: 10px; }
+        .label { color: var(--text-dim); font-size: 0.65rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; flex-shrink: 0; }
+        .val { font-weight: 700; font-size: 0.95rem; color: #fff; text-align: right; word-break: break-word; }
+        .val-id { font-family: 'Share Tech Mono', monospace; font-size: 1.3rem; color: var(--cyan-glow); text-shadow: 0 0 10px var(--cyan-glow); letter-spacing: 1px; text-transform: uppercase; }
 
         @media (min-width: 768px) {
-            header { padding: 2.5rem 0; }
-            .tabs { margin: 40px 0; }
+            .search-box { flex-direction: row; gap: 0; }
+            .search-box input { flex: 1; border-right: none; }
             .container { padding: 50px; }
-            h2 { font-size: 1.8rem; }
-            .search-box { flex-direction: row; }
-            .modal-content { margin: 8% auto; padding: 45px; }
-            .val { font-size: 1rem; }
+            .modal-content { margin: 5% auto; padding: 50px; }
+            .label { font-size: 0.7rem; }
+            .val { font-size: 1.1rem; }
         }
     </style>
 </head>
@@ -68,59 +74,49 @@
 
 <header>
     <h1>T-CORE</h1>
-    <p>TMAA Center for Online Record Entry</p>
+    <p>TMAA CENTER OF ONLINE RECORD ENTRY</p>
 </header>
 
 <div class="tabs">
-    <button class="tab-btn active" onclick="showTab('register')">REGISTRATION</button>
-    <button class="tab-btn" onclick="searchTab()">SEARCH</button>
+    <button class="tab-btn active" onclick="showTab('register')">Registration</button>
+    <button class="tab-btn" onclick="searchTab()">Directory</button>
 </div>
 
 <div id="register" class="container active">
     <h2>NEW ADMISSION</h2>
-    <label>Character Name</label>
-    <input type="text" id="regChara" placeholder="e.g. Chou Tzuyu">
-    <label>Full Name</label>
-    <input type="text" id="regFull" placeholder="e.g. Serafine Dysabelle">
-    <label>Character Birthday</label>
-    <input type="date" id="regDob">
-    <button class="main-btn" onclick="handleRegister()">SUBMIT ADMISSION</button>
+    <div class="form-group">
+        <label>Character </label>
+        <input type="text" id="regChara" placeholder="ENTER NAME">
+    </div>
+    <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="regFull" placeholder="ENTER FULL NAME">
+    </div>
+    <div class="form-group">
+        <label>Character Birthday</label>
+        <input type="date" id="regDob">
+    </div>
+    <button class="main-btn" onclick="handleRegister()">Submit Admission</button>
 </div>
 
 <div id="search" class="container">
-    <h2>PERSONNEL FINDER</h2>
+    <h2>DIRECTORY ACCESS</h2>
     <div class="search-box">
-        <input type="text" id="queryInput" placeholder="Name or character...">
-        <button class="btn-search" onclick="doSearch()">SEARCH</button>
+        <input type="text" id="queryInput" placeholder="SCAN BY NAME OR CHARACTER...">
+        <button class="btn-search" onclick="doSearch()">SCAN DIRECTORY</button>
     </div>
     <div id="resultsArea" style="display:none;">
-        <div id="adminGroup" style="display:none;">
-            <div class="section-title">MANAGEMENT TEAM</div>
-            <div class="table-wrapper">
-                <table class="result-table">
-                    <thead><tr><th>Full Name</th><th>Character</th><th style="text-align:right">Action</th></tr></thead>
-                    <tbody id="adminBody"></tbody>
-                </table>
-            </div>
-        </div>
-        <div id="studentGroup" style="display:none;">
-            <div class="section-title">STUDENTS</div>
-            <div class="table-wrapper">
-                <table class="result-table">
-                    <thead><tr><th>Full Name</th><th>Character</th><th style="text-align:right">Action</th></tr></thead>
-                    <tbody id="studentBody"></tbody>
-                </table>
-            </div>
-        </div>
+        <div id="adminGroup" style="display:none;"><div class="section-title">MANAGEMENT</div><div class="table-wrapper"><table class="result-table"><thead><tr><th>NAME</th><th>CHARACTER</th><th style="text-align:right">DOSSIER</th></tr></thead><tbody id="adminBody"></tbody></table></div></div>
+        <div id="studentGroup" style="display:none;"><div class="section-title">STUDENT</div><div class="table-wrapper"><table class="result-table"><thead><tr><th>NAME</th><th>CHARACTER</th><th style="text-align:right">DOSSIER</th></tr></thead><tbody id="studentBody"></tbody></table></div></div>
     </div>
 </div>
 
 <div id="detailModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeModal()">&times;</span>
-        <h2 id="modalTitle" style="color:var(--accent-gold); margin-bottom:20px; font-size:1.2rem; border-bottom: 1px solid var(--input-border);">Personnel File</h2>
+        <h2 id="modalTitle" style="color:var(--cyan-glow); border-bottom: 2px solid var(--cyan-glow); padding-bottom: 10px; margin-bottom: 30px; font-family:'Space Grotesk',sans-serif;">PERSONNEL DOSSIER ACCESS</h2>
         <div id="modalBody"></div>
-        <button id="modalActionBtn" class="main-btn" style="display:none; margin-top:20px;" onclick="closeModal()">OK, UNDERSTOOD</button>
+        <button id="modalActionBtn" class="main-btn" style="display:none; margin-top:30px;" onclick="closeModal()">SCAN CONFIRMED, TERMINATE VIEW</button>
     </div>
 </div>
 
@@ -155,33 +151,24 @@
         const chara = document.getElementById('regChara').value.trim();
         const full = document.getElementById('regFull').value.trim();
         const dob = document.getElementById('regDob').value;
-        if(!chara || !full || !dob) return alert("Please complete all required fields.");
+        if(!chara || !full || !dob) return alert("MISSING PROTOCOL DATA.");
 
         db.ref('registry').once('value', (snap) => {
             let dupeFull = false;
             snap.forEach(c => { if(c.val().full_name.toLowerCase() === full.toLowerCase()) dupeFull = true; });
-            if(dupeFull) return alert("This full name is already registered.");
+            if(dupeFull) return alert("PERSONNEL RECORD ALREADY ESTABLISHED.");
 
             const today = new Date();
             const currentDay = String(today.getDate()).padStart(2, '0');
-            
             const counterRef = db.ref('metadata/last_id_number');
             counterRef.once('value', (s) => {
                 let num = (s.val() || 0) + 1;
                 const finalID = "TM-01-" + currentDay + String(num).padStart(3, '0');
-                
                 const newRecord = {
-                    student_id: finalID, 
-                    chara_name: chara, 
-                    full_name: full, 
-                    dob: dob,
-                    status: "Active", 
-                    period: today.toLocaleDateString('en-GB'),
-                    kelas: "B", 
-                    position: "Student", 
-                    points: 0
+                    student_id: finalID, chara_name: chara, full_name: full, dob: dob,
+                    status: "Active", period: today.toLocaleDateString('en-GB'),
+                    kelas: "B", position: "Student", points: 0
                 };
-
                 db.ref('registry/' + finalID).set(newRecord).then(() => {
                     counterRef.set(num);
                     showAdmissionSuccess(newRecord);
@@ -192,13 +179,12 @@
 
     function showAdmissionSuccess(data) {
         isSuccessModal = true;
-        document.getElementById('modalTitle').innerText = "ADMISSION CONFIRMED";
+        document.getElementById('modalTitle').innerText = "ADMISSION ESTABLISHED";
         document.getElementById('modalBody').innerHTML = `
-            <p style="color:var(--text-muted); margin-bottom:15px; font-size:0.8rem;">Identity integration complete.</p>
-            <div class="data-row"><span class="label">ID</span><span class="val" style="color:var(--accent-gold)">${data.student_id}</span></div>
-            <div class="data-row"><span class="label">Full Name</span><span class="val">${data.full_name}</span></div>
-            <div class="data-row"><span class="label">Character</span><span class="val">${data.chara_name}</span></div>
-            <div class="data-row"><span class="label">Status</span><span class="val">${data.status}</span></div>
+            <div class="data-row"><span class="label">REGISTRY ID</span><span class="val val-id">${data.student_id}</span></div>
+            <div class="data-row"><span class="label">FULL NAME</span><span class="val">${data.full_name}</span></div>
+            <div class="data-row"><span class="label">CHARACTER</span><span class="val">${data.chara_name}</span></div>
+            <div class="data-row"><span class="label">STATUS</span><span class="val">${data.status}</span></div>
         `;
         document.getElementById('modalActionBtn').style.display = "block";
         document.getElementById('detailModal').style.display = "block";
@@ -206,31 +192,27 @@
 
     function doSearch() {
         const q = document.getElementById('queryInput').value.trim().toLowerCase();
-        if(!q) return alert("Please enter a name.");
-
+        if(!q) return alert("SCAN PARAMETER REQUIRED.");
         db.ref('registry').once('value', (snap) => {
             let mgmtH = "", studentH = "";
             let hasM = false, hasS = false;
             const mgmtPositions = ["founder", "creative team", "assistant", "secretary", "headmaster", "vice principal", "rijicho", "kocho"];
-
             snap.forEach(child => {
                 const d = child.val();
                 if(d.full_name.toLowerCase().includes(q) || d.chara_name.toLowerCase().includes(q)) {
                     const pos = (d.position || "").toLowerCase();
                     const stat = (d.status || "").toLowerCase();
                     const isManagement = mgmtPositions.some(p => pos.includes(p)) || stat === "admin";
-                    const row = `<tr><td>${d.full_name}</td><td>${d.chara_name}</td><td style="text-align:right"><span class="view-link" onclick="openDetail('${child.key}')">VIEW</span></td></tr>`;
+                    const row = `<tr><td style="font-weight:700">${d.full_name}</td><td>${d.chara_name}</td><td style="text-align:right"><span class="view-link" onclick="openDetail('${child.key}')">VIEW DOSSIER</span></td></tr>`;
                     if(isManagement) { mgmtH += row; hasM = true; }
                     else { studentH += row; hasS = true; }
                 }
             });
-
             document.getElementById('resultsArea').style.display = "block";
             document.getElementById('adminGroup').style.display = hasM ? "block" : "none";
             document.getElementById('adminBody').innerHTML = mgmtH;
             document.getElementById('studentGroup').style.display = hasS ? "block" : "none";
             document.getElementById('studentBody').innerHTML = studentH;
-            if(!hasM && !hasS) alert("No records found.");
         });
     }
 
@@ -242,19 +224,17 @@
             const pos = (d.position || "").toLowerCase();
             const stat = (d.status || "").toLowerCase();
             const isManagement = mgmtPositions.some(p => pos.includes(p)) || stat === "admin";
-            
-            const labelTanggal = isManagement ? "PERIOD" : "ENROLLMENT DATE";
-            const kelasHTML = isManagement ? "" : `<div class="data-row"><span class="label">Class</span><span class="val">${d.kelas || 'B'}</span></div>`;
-
-            document.getElementById('modalTitle').innerText = "Personnel File";
+            const labelTanggal = isManagement ? "SERVICE PERIOD" : "ENROLLMENT DATE";
+            const kelasHTML = isManagement ? "" : `<div class="data-row"><span class="label">CLASS / SECTOR</span><span class="val">${d.kelas || 'B'}</span></div>`;
+            document.getElementById('modalTitle').innerText = "PERSONNEL DOSSIER ACCESS";
             document.getElementById('modalActionBtn').style.display = "none";
             document.getElementById('modalBody').innerHTML = `
-                <div class="data-row"><span class="label">ID</span><span class="val" style="color:var(--accent-gold)">${id}</span></div>
-                <div class="data-row"><span class="label">Full Name</span><span class="val">${d.full_name}</span></div>
-                <div class="data-row"><span class="label">Character</span><span class="val">${d.chara_name}</span></div>
-                <div class="data-row"><span class="label">Position</span><span class="val">${d.position || 'Student'}</span></div>
+                <div class="data-row"><span class="label">REGISTRY ID</span><span class="val val-id">${id}</span></div>
+                <div class="data-row"><span class="label">FULL NAME</span><span class="val">${d.full_name}</span></div>
+                <div class="data-row"><span class="label">CHARACTER MUSE</span><span class="val">${d.chara_name}</span></div>
+                <div class="data-row"><span class="label">POSITION</span><span class="val">${d.position || 'Student'}</span></div>
                 ${kelasHTML}
-                <div class="data-row"><span class="label">Status</span><span class="val">${d.status}</span></div>
+                <div class="data-row"><span class="label">PROTOCOL STATUS</span><span class="val">${d.status}</span></div>
                 <div class="data-row"><span class="label">${labelTanggal}</span><span class="val">${isManagement ? (d.period || '-') : (d.period || d.dob)}</span></div>
             `;
             document.getElementById('detailModal').style.display = "block";
