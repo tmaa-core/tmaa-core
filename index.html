@@ -73,16 +73,16 @@
 
 <div class="tabs">
     <button class="tab-btn active" onclick="showTab('register')">REGISTRATION</button>
-    <button class="tab-btn" onclick="showTab('search')">SEARCH</button>
+    <button class="tab-btn" onclick="searchTab()">SEARCH</button>
 </div>
 
 <div id="register" class="container active">
     <h2>NEW ADMISSION</h2>
     <label>Character Name</label>
-    <input type="text" id="regChara" placeholder="e.g. Kim Taehyung">
+    <input type="text" id="regChara" placeholder="e.g. Chou Tzuyu">
     <label>Full Name</label>
-    <input type="text" id="regFull" placeholder="e.g. Putra Budi">
-    <label>Date of Birth</label>
+    <input type="text" id="regFull" placeholder="e.g. Serafine Dysabelle">
+    <label>Character Birthday</label>
     <input type="date" id="regDob">
     <button class="main-btn" onclick="handleRegister()">SUBMIT ADMISSION</button>
 </div>
@@ -90,7 +90,7 @@
 <div id="search" class="container">
     <h2>PERSONNEL FINDER</h2>
     <div class="search-box">
-        <input type="text" id="queryInput" placeholder="Search by name or character...">
+        <input type="text" id="queryInput" placeholder="Name or character...">
         <button class="btn-search" onclick="doSearch()">SEARCH</button>
     </div>
     <div id="resultsArea" style="display:none;">
@@ -149,6 +149,8 @@
         event.currentTarget.classList.add('active');
     }
 
+    function searchTab() { showTab('search'); }
+
     function handleRegister() {
         const chara = document.getElementById('regChara').value.trim();
         const full = document.getElementById('regFull').value.trim();
@@ -158,14 +160,15 @@
         db.ref('registry').once('value', (snap) => {
             let dupeFull = false;
             snap.forEach(c => { if(c.val().full_name.toLowerCase() === full.toLowerCase()) dupeFull = true; });
-            
-            if(dupeFull) return alert("This full name is already registered in the system.");
+            if(dupeFull) return alert("This full name is already registered.");
 
-            const DD = String(new Date(dob).getDate()).padStart(2, '0');
+            const today = new Date();
+            const currentDay = String(today.getDate()).padStart(2, '0');
+            
             const counterRef = db.ref('metadata/last_id_number');
             counterRef.once('value', (s) => {
                 let num = (s.val() || 0) + 1;
-                const finalID = "TM-01-" + DD + String(num).padStart(3, '0');
+                const finalID = "TM-01-" + currentDay + String(num).padStart(3, '0');
                 
                 const newRecord = {
                     student_id: finalID, 
@@ -173,7 +176,7 @@
                     full_name: full, 
                     dob: dob,
                     status: "Active", 
-                    period: new Date().toLocaleDateString('en-GB'),
+                    period: today.toLocaleDateString('en-GB'),
                     kelas: "B", 
                     position: "Student", 
                     points: 0
@@ -191,7 +194,7 @@
         isSuccessModal = true;
         document.getElementById('modalTitle').innerText = "ADMISSION CONFIRMED";
         document.getElementById('modalBody').innerHTML = `
-            <p style="color:var(--text-muted); margin-bottom:15px; font-size:0.8rem;">Your identity has been successfully integrated into the system.</p>
+            <p style="color:var(--text-muted); margin-bottom:15px; font-size:0.8rem;">Identity integration complete.</p>
             <div class="data-row"><span class="label">ID</span><span class="val" style="color:var(--accent-gold)">${data.student_id}</span></div>
             <div class="data-row"><span class="label">Full Name</span><span class="val">${data.full_name}</span></div>
             <div class="data-row"><span class="label">Character</span><span class="val">${data.chara_name}</span></div>
@@ -203,7 +206,7 @@
 
     function doSearch() {
         const q = document.getElementById('queryInput').value.trim().toLowerCase();
-        if(!q) return alert("Please enter a name to search.");
+        if(!q) return alert("Please enter a name.");
 
         db.ref('registry').once('value', (snap) => {
             let mgmtH = "", studentH = "";
