@@ -32,10 +32,10 @@
 
         h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--text-white); margin-bottom: 40px; letter-spacing: 2px; text-transform: uppercase; border-left: 4px solid var(--cyan-glow); padding-left: 15px; }
         
-        .form-group { margin-bottom: 35px; }
-        label { display: block; font-size: 0.65rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; }
+        .form-group { margin-bottom: 30px; }
+        label { display: block; font-size: 0.65rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
         
-        input { width: 100%; padding: 16px; margin-top: 5px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0; font-size: 0.9rem; color: #fff; background: rgba(0, 0, 0, 0.5); box-sizing: border-box; font-family: 'Share Tech Mono', monospace; }
+        input { width: 100%; padding: 16px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0; font-size: 0.9rem; color: #fff; background: rgba(0, 0, 0, 0.5); box-sizing: border-box; font-family: 'Share Tech Mono', monospace; margin-top: 0; }
         input:focus { outline: none; border-color: var(--cyan-glow); box-shadow: 0 0 10px var(--border-glow); }
 
         button.main-btn { background: transparent; color: var(--cyan-glow); border: 1px solid var(--cyan-glow); padding: 18px; width: 100%; font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 0.9rem; cursor: pointer; text-transform: uppercase; letter-spacing: 4px; transition: 0.4s; margin-top: 10px; }
@@ -167,18 +167,26 @@
                 return;
             }
 
-            const today = new Date();
-            const currentDay = String(today.getDate()).padStart(2, '0');
+            const birthdayDate = new Date(dob);
+            const dayOfBirth = String(birthdayDate.getDate()).padStart(2, '0');
+
             const counterRef = db.ref('metadata/last_id_number');
-            
             counterRef.once('value', (s) => {
                 let num = (s.val() || 0) + 1;
-                const finalID = "TM-01-" + currentDay + String(num).padStart(3, '0');
+                const finalID = "TM-01-" + dayOfBirth + String(num).padStart(3, '0');
+                
                 const newRecord = {
-                    student_id: finalID, chara_name: chara, full_name: full, dob: dob,
-                    status: "Active", period: today.toLocaleDateString('en-GB'),
-                    kelas: "B", position: "Student", points: 0
+                    student_id: finalID, 
+                    chara_name: chara, 
+                    full_name: full, 
+                    birthday: dob,
+                    status: "Active", 
+                    period: new Date().toLocaleDateString('en-GB'),
+                    kelas: "B", 
+                    position: "Student", 
+                    points: 0
                 };
+
                 db.ref('registry/' + finalID).set(newRecord).then(() => {
                     counterRef.set(num);
                     showAdmissionSuccess(newRecord);
@@ -218,6 +226,7 @@
             <div class="data-row"><span class="label">REGISTRY ID</span><span class="val val-id">${data.student_id}</span></div>
             <div class="data-row"><span class="label">FULL NAME</span><span class="val">${data.full_name}</span></div>
             <div class="data-row"><span class="label">CHARACTER</span><span class="val">${data.chara_name}</span></div>
+            <div class="data-row"><span class="label">CHARACTER BIRTHDAY</span><span class="val">${data.birthday}</span></div>
             <div class="data-row"><span class="label">STATUS</span><span class="val">${data.status}</span></div>
         `;
         document.getElementById('modalActionBtn').style.display = "block";
@@ -280,12 +289,13 @@
             document.getElementById('modalActionBtn').style.display = "none";
             
             document.getElementById('modalBody').innerHTML = `
-                <div class="data-row"><span class="label">REGISTRY ID</span><span class="val val-id">${id}</span></div>
+                <div class="data-row"><span class="label">MEMBER ID</span><span class="val val-id">${id}</span></div>
                 <div class="data-row"><span class="label">FULL NAME</span><span class="val">${d.full_name}</span></div>
                 <div class="data-row"><span class="label">CHARACTER</span><span class="val">${d.chara_name}</span></div>
+                <div class="data-row"><span class="label">CHARACTER BIRTHDAY</span><span class="val">${d.birthday || '-'}</span></div>
                 <div class="data-row"><span class="label">POSITION</span><span class="val">${d.position || 'Student'}</span></div>
                 ${kelasHTML}
-                <div class="data-row"><span class="label">PROTOCOL STATUS</span><span class="val">${d.status}</span></div>
+                <div class="data-row"><span class="label">STATUS</span><span class="val">${d.status}</span></div>
                 <div class="data-row"><span class="label">${labelTanggal}</span><span class="val">${isManagement ? (d.period || '-') : (d.period || d.dob)}</span></div>
             `;
             modal.style.display = "block";
