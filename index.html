@@ -12,6 +12,7 @@
             --text-white: #ffffff;
             --text-dim: #71717a;
             --cyan-glow: #00f2ff;
+            --error-red: #ff3b3b;
             --indigo-glow: #7c3aed;
             --border-glow: rgba(0, 242, 255, 0.3);
         }
@@ -29,12 +30,12 @@
         .container { width: 92%; max-width: 900px; background: var(--surface); backdrop-filter: blur(20px); padding: 30px; border: 1px solid var(--border-glow); display: none; margin-bottom: 50px; box-sizing: border-box; }
         .container.active { display: block; }
 
-        h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--text-white); margin-bottom: 30px; letter-spacing: 2px; text-transform: uppercase; border-left: 4px solid var(--cyan-glow); padding-left: 15px; }
+        h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--text-white); margin-bottom: 40px; letter-spacing: 2px; text-transform: uppercase; border-left: 4px solid var(--cyan-glow); padding-left: 15px; }
         
-        .form-group { margin-bottom: 30px; }
-        label { display: block; font-size: 0.6rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; }
+        .form-group { margin-bottom: 35px; }
+        label { display: block; font-size: 0.65rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; }
         
-        input { width: 100%; padding: 16px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0; font-size: 0.9rem; color: #fff; background: rgba(0, 0, 0, 0.5); box-sizing: border-box; font-family: 'Share Tech Mono', monospace; }
+        input { width: 100%; padding: 16px; margin-top: 5px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0; font-size: 0.9rem; color: #fff; background: rgba(0, 0, 0, 0.5); box-sizing: border-box; font-family: 'Share Tech Mono', monospace; }
         input:focus { outline: none; border-color: var(--cyan-glow); box-shadow: 0 0 10px var(--border-glow); }
 
         button.main-btn { background: transparent; color: var(--cyan-glow); border: 1px solid var(--cyan-glow); padding: 18px; width: 100%; font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 0.9rem; cursor: pointer; text-transform: uppercase; letter-spacing: 4px; transition: 0.4s; margin-top: 10px; }
@@ -78,25 +79,25 @@
 </header>
 
 <div class="tabs">
-    <button class="tab-btn active" onclick="showTab('register')">Registration</button>
-    <button class="tab-btn" onclick="searchTab()">Directory</button>
+    <button class="tab-btn active" onclick="showTab('register')">REGISTRATION</button>
+    <button class="tab-btn" onclick="searchTab()">DIRECTORY</button>
 </div>
 
 <div id="register" class="container active">
     <h2>NEW ADMISSION</h2>
     <div class="form-group">
-        <label>Character </label>
+        <label>CHARACTER</label>
         <input type="text" id="regChara" placeholder="ENTER NAME">
     </div>
     <div class="form-group">
-        <label>Full Name</label>
+        <label>FULL NAME</label>
         <input type="text" id="regFull" placeholder="ENTER FULL NAME">
     </div>
     <div class="form-group">
-        <label>Character Birthday</label>
+        <label>CHARACTER BIRTHDAY</label>
         <input type="date" id="regDob">
     </div>
-    <button class="main-btn" onclick="handleRegister()">Submit Admission</button>
+    <button class="main-btn" onclick="handleRegister()">SUBMIT ADMISSION</button>
 </div>
 
 <div id="search" class="container">
@@ -116,7 +117,7 @@
         <span class="close-btn" onclick="closeModal()">&times;</span>
         <h2 id="modalTitle" style="color:var(--cyan-glow); border-bottom: 2px solid var(--cyan-glow); padding-bottom: 10px; margin-bottom: 30px; font-family:'Space Grotesk',sans-serif;">PERSONNEL DOSSIER ACCESS</h2>
         <div id="modalBody"></div>
-        <button id="modalActionBtn" class="main-btn" style="display:none; margin-top:30px;" onclick="closeModal()">SCAN CONFIRMED, TERMINATE VIEW</button>
+        <button id="modalActionBtn" class="main-btn" style="display:none; margin-top:30px;" onclick="closeModal()">CONFIRM & CLOSE</button>
     </div>
 </div>
 
@@ -136,7 +137,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let isSuccessModal = false;
+    let shouldReload = false;
 
     function showTab(id) {
         document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
@@ -151,16 +152,25 @@
         const chara = document.getElementById('regChara').value.trim();
         const full = document.getElementById('regFull').value.trim();
         const dob = document.getElementById('regDob').value;
-        if(!chara || !full || !dob) return alert("MISSING PROTOCOL DATA.");
+
+        if(!chara || !full || !dob) {
+            showCustomModal("DATA INCOMPLETE", "Please provide all mandatory protocol data.", true);
+            return;
+        }
 
         db.ref('registry').once('value', (snap) => {
             let dupeFull = false;
             snap.forEach(c => { if(c.val().full_name.toLowerCase() === full.toLowerCase()) dupeFull = true; });
-            if(dupeFull) return alert("PERSONNEL RECORD ALREADY ESTABLISHED.");
+            
+            if(dupeFull) {
+                showCustomModal("ACCESS DENIED", "This personnel identity is already integrated into the system.", true);
+                return;
+            }
 
             const today = new Date();
             const currentDay = String(today.getDate()).padStart(2, '0');
             const counterRef = db.ref('metadata/last_id_number');
+            
             counterRef.once('value', (s) => {
                 let num = (s.val() || 0) + 1;
                 const finalID = "TM-01-" + currentDay + String(num).padStart(3, '0');
@@ -177,26 +187,56 @@
         });
     }
 
+    function showCustomModal(title, message, isError = false) {
+        shouldReload = false;
+        const modal = document.getElementById('detailModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+        const actionBtn = document.getElementById('modalActionBtn');
+
+        modalTitle.innerText = title;
+        modalTitle.style.color = isError ? "var(--error-red)" : "var(--cyan-glow)";
+        modal.querySelector('.modal-content').style.borderColor = isError ? "var(--error-red)" : "var(--cyan-glow)";
+        
+        modalBody.innerHTML = `<p style="color:var(--text-white); font-weight:600; text-align:center;">${message}</p>`;
+        actionBtn.style.display = "block";
+        actionBtn.innerText = "UNDERSTOOD";
+        modal.style.display = "block";
+    }
+
     function showAdmissionSuccess(data) {
-        isSuccessModal = true;
-        document.getElementById('modalTitle').innerText = "ADMISSION ESTABLISHED";
-        document.getElementById('modalBody').innerHTML = `
+        shouldReload = true;
+        const modal = document.getElementById('detailModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+        
+        modalTitle.innerText = "ADMISSION CONFIRMED";
+        modalTitle.style.color = "var(--cyan-glow)";
+        modal.querySelector('.modal-content').style.borderColor = "var(--cyan-glow)";
+
+        modalBody.innerHTML = `
             <div class="data-row"><span class="label">REGISTRY ID</span><span class="val val-id">${data.student_id}</span></div>
             <div class="data-row"><span class="label">FULL NAME</span><span class="val">${data.full_name}</span></div>
             <div class="data-row"><span class="label">CHARACTER</span><span class="val">${data.chara_name}</span></div>
             <div class="data-row"><span class="label">STATUS</span><span class="val">${data.status}</span></div>
         `;
         document.getElementById('modalActionBtn').style.display = "block";
-        document.getElementById('detailModal').style.display = "block";
+        document.getElementById('modalActionBtn').innerText = "CONFIRM & CLOSE";
+        modal.style.display = "block";
     }
 
     function doSearch() {
         const q = document.getElementById('queryInput').value.trim().toLowerCase();
-        if(!q) return alert("SCAN PARAMETER REQUIRED.");
+        if(!q) {
+            showCustomModal("SCAN ERROR", "Scan parameter required for directory access.", true);
+            return;
+        }
+
         db.ref('registry').once('value', (snap) => {
             let mgmtH = "", studentH = "";
             let hasM = false, hasS = false;
-            const mgmtPositions = ["founder", "creative team", "assistant", "secretary", "headmaster", "vice principal", "rijicho", "kocho"];
+            const mgmtPositions = ["founder", "creative team", "assistant", "secretary", "headmaster", "vice principal", "chairman"];
+            
             snap.forEach(child => {
                 const d = child.val();
                 if(d.full_name.toLowerCase().includes(q) || d.chara_name.toLowerCase().includes(q)) {
@@ -208,6 +248,12 @@
                     else { studentH += row; hasS = true; }
                 }
             });
+            
+            if(!hasM && !hasS) {
+                showCustomModal("NOT FOUND", "No records match the provided scan identity.", true);
+                return;
+            }
+
             document.getElementById('resultsArea').style.display = "block";
             document.getElementById('adminGroup').style.display = hasM ? "block" : "none";
             document.getElementById('adminBody').innerHTML = mgmtH;
@@ -217,33 +263,38 @@
     }
 
     function openDetail(id) {
-        isSuccessModal = false;
+        shouldReload = false;
         db.ref('registry/'+id).once('value', s => {
             const d = s.val();
-            const mgmtPositions = ["founder", "creative team", "assistant", "secretary", "headmaster", "vice principal", "rijicho", "kocho"];
+            const mgmtPositions = ["founder", "creative team", "assistant", "secretary", "headmaster", "vice principal", "chairman"];
             const pos = (d.position || "").toLowerCase();
             const stat = (d.status || "").toLowerCase();
             const isManagement = mgmtPositions.some(p => pos.includes(p)) || stat === "admin";
             const labelTanggal = isManagement ? "SERVICE PERIOD" : "ENROLLMENT DATE";
             const kelasHTML = isManagement ? "" : `<div class="data-row"><span class="label">CLASS / SECTOR</span><span class="val">${d.kelas || 'B'}</span></div>`;
+            
+            const modal = document.getElementById('detailModal');
             document.getElementById('modalTitle').innerText = "PERSONNEL DOSSIER ACCESS";
+            document.getElementById('modalTitle').style.color = "var(--cyan-glow)";
+            modal.querySelector('.modal-content').style.borderColor = "var(--cyan-glow)";
             document.getElementById('modalActionBtn').style.display = "none";
+            
             document.getElementById('modalBody').innerHTML = `
                 <div class="data-row"><span class="label">REGISTRY ID</span><span class="val val-id">${id}</span></div>
                 <div class="data-row"><span class="label">FULL NAME</span><span class="val">${d.full_name}</span></div>
-                <div class="data-row"><span class="label">CHARACTER MUSE</span><span class="val">${d.chara_name}</span></div>
+                <div class="data-row"><span class="label">CHARACTER</span><span class="val">${d.chara_name}</span></div>
                 <div class="data-row"><span class="label">POSITION</span><span class="val">${d.position || 'Student'}</span></div>
                 ${kelasHTML}
                 <div class="data-row"><span class="label">PROTOCOL STATUS</span><span class="val">${d.status}</span></div>
                 <div class="data-row"><span class="label">${labelTanggal}</span><span class="val">${isManagement ? (d.period || '-') : (d.period || d.dob)}</span></div>
             `;
-            document.getElementById('detailModal').style.display = "block";
+            modal.style.display = "block";
         });
     }
 
     function closeModal() { 
         document.getElementById('detailModal').style.display = "none"; 
-        if(isSuccessModal) location.reload();
+        if(shouldReload) location.reload();
     }
 </script>
 </body>
