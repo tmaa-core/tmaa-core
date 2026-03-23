@@ -68,7 +68,7 @@
 
 <header>
     <h1>T-CORE</h1>
-    <p>TMAA Center of Online Record Entry</p>
+    <p>TMAA Center for Online Record Entry</p>
 </header>
 
 <div class="tabs">
@@ -79,9 +79,9 @@
 <div id="register" class="container active">
     <h2>NEW ADMISSION</h2>
     <label>Character Name</label>
-    <input type="text" id="regChara" placeholder="e.g. Chou Tzuyu">
+    <input type="text" id="regChara" placeholder="e.g. Kim Taehyung">
     <label>Full Name</label>
-    <input type="text" id="regFull" placeholder="e.g. Serafine Dysabelle">
+    <input type="text" id="regFull" placeholder="e.g. Putra Budi">
     <label>Date of Birth</label>
     <input type="date" id="regDob">
     <button class="main-btn" onclick="handleRegister()">SUBMIT ADMISSION</button>
@@ -90,7 +90,7 @@
 <div id="search" class="container">
     <h2>PERSONNEL FINDER</h2>
     <div class="search-box">
-        <input type="text" id="queryInput" placeholder="Name or character...">
+        <input type="text" id="queryInput" placeholder="Search by name or character...">
         <button class="btn-search" onclick="doSearch()">SEARCH</button>
     </div>
     <div id="resultsArea" style="display:none;">
@@ -156,9 +156,10 @@
         if(!chara || !full || !dob) return alert("Please complete all required fields.");
 
         db.ref('registry').once('value', (snap) => {
-            let dupe = false;
-            snap.forEach(c => { if(c.val().chara_name.toLowerCase() === chara.toLowerCase() || c.val().full_name.toLowerCase() === full.toLowerCase()) dupe = true; });
-            if(dupe) return alert("This identity is already registered.");
+            let dupeFull = false;
+            snap.forEach(c => { if(c.val().full_name.toLowerCase() === full.toLowerCase()) dupeFull = true; });
+            
+            if(dupeFull) return alert("This full name is already registered in the system.");
 
             const DD = String(new Date(dob).getDate()).padStart(2, '0');
             const counterRef = db.ref('metadata/last_id_number');
@@ -190,7 +191,7 @@
         isSuccessModal = true;
         document.getElementById('modalTitle').innerText = "ADMISSION CONFIRMED";
         document.getElementById('modalBody').innerHTML = `
-            <p style="color:var(--text-muted); margin-bottom:15px; font-size:0.8rem;">Your identity has been successfully integrated.</p>
+            <p style="color:var(--text-muted); margin-bottom:15px; font-size:0.8rem;">Your identity has been successfully integrated into the system.</p>
             <div class="data-row"><span class="label">ID</span><span class="val" style="color:var(--accent-gold)">${data.student_id}</span></div>
             <div class="data-row"><span class="label">Full Name</span><span class="val">${data.full_name}</span></div>
             <div class="data-row"><span class="label">Character</span><span class="val">${data.chara_name}</span></div>
@@ -202,7 +203,7 @@
 
     function doSearch() {
         const q = document.getElementById('queryInput').value.trim().toLowerCase();
-        if(!q) return alert("Please enter a name.");
+        if(!q) return alert("Please enter a name to search.");
 
         db.ref('registry').once('value', (snap) => {
             let mgmtH = "", studentH = "";
