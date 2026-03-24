@@ -185,7 +185,7 @@
                     birthday: dob,
                     status: "Active", 
                     period: new Date().toLocaleDateString('en-GB'),
-                    kelas: "B", // Default Trainee
+                    kelas: "B", 
                     position: "Batch " + parseInt(CURRENT_BATCH) + " Student",
                     points: 0
                 };
@@ -285,7 +285,6 @@
             const pos = (d.position || "").toLowerCase();
             const stat = (d.status || "").toLowerCase();
             const isManagement = mgmtPositions.some(p => pos.includes(p)) || stat === "admin";
-            const labelTanggal = isManagement ? "SERVICE PERIOD" : "ENROLLMENT DATE";
             
             let rankHTML = "";
             if(isManagement) {
@@ -309,7 +308,7 @@
                 <div class="data-row"><span class="label">CHARACTER BIRTHDAY</span><span class="val">${d.birthday || '-'}</span></div>
                 ${rankHTML}
                 <div class="data-row"><span class="label">STATUS</span><span class="val">${d.status}</span></div>
-                <div class="data-row"><span class="label">${labelTanggal}</span><span class="val">${isManagement ? (d.period || '-') : (d.period || d.dob)}</span></div>
+                <div class="data-row"><span class="label">PERIOD</span><span class="val">${isManagement ? (d.period || '-') : (d.period || d.dob)}</span></div>
             `;
             modal.style.display = "block";
         });
