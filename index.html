@@ -108,7 +108,8 @@
     </div>
     <div id="resultsArea" style="display:none;">
         <div id="adminGroup" style="display:none;"><div class="section-title">MANAGEMENT</div><div class="table-wrapper"><table class="result-table"><thead><tr><th>NAME</th><th>CHARACTER</th><th style="text-align:right">DOSSIER</th></tr></thead><tbody id="adminBody"></tbody></table></div></div>
-        <div id="studentGroup" style="display:none;"><div class="section-title">STUDENT</div><div class="table-wrapper"><table class="result-table"><thead><tr><th>NAME</th><th>CHARACTER</th><th style="text-align:right">DOSSIER</th></tr></thead><tbody id="studentBody"></tbody></table></div></div>
+        <div id="classAGroup" style="display:none;"><div class="section-title">CLASS A (SENIOR)</div><div class="table-wrapper"><table class="result-table"><thead><tr><th>NAME</th><th>CHARACTER</th><th style="text-align:right">DOSSIER</th></tr></thead><tbody id="classABody"></tbody></table></div></div>
+        <div id="classBGroup" style="display:none;"><div class="section-title">CLASS B (TRAINEE)</div><div class="table-wrapper"><table class="result-table"><thead><tr><th>NAME</th><th>CHARACTER</th><th style="text-align:right">DOSSIER</th></tr></thead><tbody id="classBBody"></tbody></table></div></div>
     </div>
 </div>
 
@@ -137,6 +138,8 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    const CURRENT_BATCH = "01";
+
     let shouldReload = false;
 
     function showTab(id) {
@@ -163,7 +166,7 @@
             snap.forEach(c => { if(c.val().full_name.toLowerCase() === full.toLowerCase()) dupeFull = true; });
             
             if(dupeFull) {
-                showCustomModal("ACCESS DENIED", "This personnel identity is already integrated into the system.", true);
+                showCustomModal("SUBMISSION DENIED", "This name is already registered in our file.", true);
                 return;
             }
 
@@ -173,7 +176,7 @@
             const counterRef = db.ref('metadata/last_id_number');
             counterRef.once('value', (s) => {
                 let num = (s.val() || 0) + 1;
-                const finalID = "TM-01-" + dayOfBirth + String(num).padStart(3, '0');
+                const finalID = "TM-" + CURRENT_BATCH + "-" + dayOfBirth + String(num).padStart(3, '0');
                 
                 const newRecord = {
                     student_id: finalID, 
@@ -182,8 +185,8 @@
                     birthday: dob,
                     status: "Active", 
                     period: new Date().toLocaleDateString('en-GB'),
-                    kelas: "B", 
-                    position: "Student", 
+                    kelas: "B", // Default Trainee
+                    position: "Batch " + parseInt(CURRENT_BATCH) + " Student",
                     points: 0
                 };
 
@@ -227,7 +230,6 @@
             <div class="data-row"><span class="label">FULL NAME</span><span class="val">${data.full_name}</span></div>
             <div class="data-row"><span class="label">CHARACTER</span><span class="val">${data.chara_name}</span></div>
             <div class="data-row"><span class="label">CHARACTER BIRTHDAY</span><span class="val">${data.birthday}</span></div>
-            <div class="data-row"><span class="label">STATUS</span><span class="val">${data.status}</span></div>
         `;
         document.getElementById('modalActionBtn').style.display = "block";
         document.getElementById('modalActionBtn').innerText = "CONFIRM & CLOSE";
@@ -242,8 +244,8 @@
         }
 
         db.ref('registry').once('value', (snap) => {
-            let mgmtH = "", studentH = "";
-            let hasM = false, hasS = false;
+            let mgmtH = "", classAH = "", classBH = "";
+            let hasM = false, hasA = false, hasB = false;
             const mgmtPositions = ["founder", "creative team", "assistant", "secretary", "headmaster", "vice principal", "chairman"];
             
             snap.forEach(child => {
@@ -253,12 +255,14 @@
                     const stat = (d.status || "").toLowerCase();
                     const isManagement = mgmtPositions.some(p => pos.includes(p)) || stat === "admin";
                     const row = `<tr><td style="font-weight:700">${d.full_name}</td><td>${d.chara_name}</td><td style="text-align:right"><span class="view-link" onclick="openDetail('${child.key}')">VIEW DOSSIER</span></td></tr>`;
+                    
                     if(isManagement) { mgmtH += row; hasM = true; }
-                    else { studentH += row; hasS = true; }
+                    else if(d.kelas === "A") { classAH += row; hasA = true; }
+                    else { classBH += row; hasB = true; }
                 }
             });
             
-            if(!hasM && !hasS) {
+            if(!hasM && !hasA && !hasB) {
                 showCustomModal("NOT FOUND", "No records match the provided scan identity.", true);
                 return;
             }
@@ -266,8 +270,10 @@
             document.getElementById('resultsArea').style.display = "block";
             document.getElementById('adminGroup').style.display = hasM ? "block" : "none";
             document.getElementById('adminBody').innerHTML = mgmtH;
-            document.getElementById('studentGroup').style.display = hasS ? "block" : "none";
-            document.getElementById('studentBody').innerHTML = studentH;
+            document.getElementById('classAGroup').style.display = hasA ? "block" : "none";
+            document.getElementById('classABody').innerHTML = classAH;
+            document.getElementById('classBGroup').style.display = hasB ? "block" : "none";
+            document.getElementById('classBBody').innerHTML = classBH;
         });
     }
 
@@ -280,8 +286,16 @@
             const stat = (d.status || "").toLowerCase();
             const isManagement = mgmtPositions.some(p => pos.includes(p)) || stat === "admin";
             const labelTanggal = isManagement ? "SERVICE PERIOD" : "ENROLLMENT DATE";
-            const kelasHTML = isManagement ? "" : `<div class="data-row"><span class="label">CLASS / SECTOR</span><span class="val">${d.kelas || 'B'}</span></div>`;
             
+            let rankHTML = "";
+            if(isManagement) {
+                rankHTML = `<div class="data-row"><span class="label">POSITION</span><span class="val">${d.position}</span></div>`;
+            } else {
+                const batchMatch = d.position ? d.position.match(/\d+/) : "1";
+                const formattedBatch = String(batchMatch).padStart(2, '0');
+                rankHTML = `<div class="data-row"><span class="label">BATCH</span><span class="val">${formattedBatch}</span></div>`;
+            }
+
             const modal = document.getElementById('detailModal');
             document.getElementById('modalTitle').innerText = "PERSONNEL DOSSIER ACCESS";
             document.getElementById('modalTitle').style.color = "var(--cyan-glow)";
@@ -293,8 +307,7 @@
                 <div class="data-row"><span class="label">FULL NAME</span><span class="val">${d.full_name}</span></div>
                 <div class="data-row"><span class="label">CHARACTER</span><span class="val">${d.chara_name}</span></div>
                 <div class="data-row"><span class="label">CHARACTER BIRTHDAY</span><span class="val">${d.birthday || '-'}</span></div>
-                <div class="data-row"><span class="label">POSITION</span><span class="val">${d.position || 'Student'}</span></div>
-                ${kelasHTML}
+                ${rankHTML}
                 <div class="data-row"><span class="label">STATUS</span><span class="val">${d.status}</span></div>
                 <div class="data-row"><span class="label">${labelTanggal}</span><span class="val">${isManagement ? (d.period || '-') : (d.period || d.dob)}</span></div>
             `;
